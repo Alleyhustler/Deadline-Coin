@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadLine - Every chain has its time</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0B0C0D;
+            color: #E6E6E6;
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* Stone texture background */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(30, 30, 30, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(20, 20, 20, 0.3) 0%, transparent 50%),
+                linear-gradient(0deg, #0B0C0D, #0B0C0D);
+            background-blend-mode: overlay;
+            z-index: -2;
+        }
+
+        /* Subtle stone texture */
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230B0C0D"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%23111111" stroke-width="0.5"/><circle cx="50" cy="50" r="40" stroke="%23111111" stroke-width="0.3" fill="none"/></svg>');
+            opacity: 0.4;
+            z-index: -1;
+        }
+
+        .container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Logo styling */
+        .logo-container {
+            position: absolute;
+            top: 8%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logo {
+            width: 250px;
+            height: 250px;
+
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 0 15px rgba(0, 0, 0, 0.8),
+                inset 0 0 15px rgba(0, 0, 0, 0.8);
+            animation: rotate 40s linear infinite;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: shine 12s linear infinite;
+        }
+
+        .logo img {
+            width: 105%;
+            height: 105%;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4rem;
+            margin-top: 13.2rem;
+            text-align: center;
+            color: #d4d4d4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+            opacity: 0.7;
+            text-align: center;
+            letter-spacing: 0.1rem;
+        }
+
+        /* Twitter button */
+        .twitter-link {
+            margin-top: 1.2rem;
+            color: #b0b0b0;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(100, 100, 100, 0.3);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            background: rgba(20, 20, 20, 0.5);
+        }
+
+        .twitter-link:hover {
+            border-color: rgba(160, 160, 160, 0.5);
+            background-color: rgba(40, 40, 40, 0.5);
+            color: #d0d0d0;
+        }
+
+        /* Timeline container */
+        .timeline-container {
+            position: relative;
+            width: 85%;
+            height: 180px;
+            margin-top: 2rem;
+        }
+
+        /* The timeline line */
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, 
+                rgba(80, 80, 80, 0.8) 0%, 
+                rgba(100, 100, 100, 0.6) 20%, 
+                rgba(120, 120, 120, 0.4) 50%, 
+                rgba(100, 100, 100, 0.6) 80%, 
+                rgba(80, 80, 80, 0.8) 100%);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(150, 150, 150, 0.8) 0%, 
+                rgba(180, 180, 180, 0.6) 50%, 
+                rgba(150, 150, 150, 0.8) 100%);
+            animation: timeline-progress 25s ease-in-out forwards;
+            box-shadow: 0 0 8px rgba(200, 200, 200, 0.3);
+        }
+
+        @keyframes timeline-progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* Timeline nodes */
+        .timeline-node {
+            position: absolute;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            background-color: #1a1a1a;
+            border: 2px solid #666;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
+        }
+
+        .timeline-node.active {
+            border-color: #999;
+            background-color: #2a2a2a;
+            box-shadow: 0 0 8px rgba(150, 150, 150, 0.5);
+        }
+
+        /* Year labels */
+        .year-label {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            opacity: 0.6;
+            white-space: nowrap;
+            transition: opacity 0.5s ease;
+        }
+
+        .year-label.active {
+            opacity: 0.9;
+        }
+
+        /* Event text */
+        .event-text {
+            position: absolute;
+            top: -75px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            text-align: center;
+            width: 200px;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            color: #d0d0d0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .event-text.active {
+            opacity: 1;
+        }
+
+        .accent {
+            color: #a07855;
+        }
+
+        /* Final message */
+        .final-message {
+            position: absolute;
+            bottom: 18%;
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 3s ease;
+            color: #c0c0c0;
+            font-style: italic;
+            letter-spacing: 0.05rem;
+        }
+
+        .final-message.visible {
+            opacity: 0.9;
+        }
+
+        /* Particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background-color: rgba(120, 120, 120, 0.4);
+            border-radius: 50%;
+            animation: float 25s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) translateX(20px);
+                opacity: 0;
+            }
+        }
+
+        /* Sleep mode overlay */
+        .sleep-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 5, 5, 0);
+            z-index: 100;
+            pointer-events: none;
+            transition: background-color 4s ease;
+        }
+
+        .sleep-overlay.active {
+            background-color: rgba(5, 5, 5, 0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="sleep-overlay"></div>
+    
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo">
+                <!-- ACTUAL LOGO.PNG FILE -->
+                <img src="a.png" alt="DeadLine Logo">
+            </div>
+            <h1 class="title">DeadLine</h1>
+            <p class="subtitle">Every chain has its time.</p>
+            <a href="https://x.com/DeadLineSol" class="twitter-link" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Join The Deadline
+            </a>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-line" id="timeline"></div>
+            
+            <!-- Timeline nodes will be generated by JavaScript -->
+        </div>
+
+        <div class="final-message" id="finalMessage">
+            "History doesn't repeat — it loops."
+        </div>
+    </div>
+
+    <div class="particles" id="particles"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create particles
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 25 + 's';
+                particle.style.animationDuration = (20 + Math.random() * 20) + 's';
+                particlesContainer.appendChild(particle);
+            }
+
+            // Timeline data
+            const timelineData = [
+                { year: 2020, text: "Genesis. The light begins." },
+                { year: 2021, text: "Degens rise from the dust." },
+                { year: 2022, text: "The great crash." },
+                { year: 2023, text: "Builders stay. Ghosts too." },
+                { year: 2024, text: "Revival through ruin." },
+                { year: 2025, text: "You're reading the last line." }
+            ];
+
+            const timelineContainer = document.querySelector('.timeline-container');
+            const timelineLine = document.getElementById('timeline');
+            const finalMessage = document.getElementById('finalMessage');
+            const sleepOverlay = document.querySelector('.sleep-overlay');
+
+            // Create timeline nodes and text elements
+            timelineData.forEach((event, index) => {
+                // Calculate position percentage
+                const position = (index / (timelineData.length - 1)) * 100;
+                
+                // Create node
+                const node = document.createElement('div');
+                node.classList.add('timeline-node');
+                node.style.left = `${position}%`;
+                node.id = `node-${index}`;
+                timelineContainer.appendChild(node);
+                
+                // Create year label
+                const yearLabel = document.createElement('div');
+                yearLabel.classList.add('year-label');
+                yearLabel.textContent = event.year;
+                yearLabel.style.left = `${position}%`;
+                yearLabel.id = `year-${index}`;
+                timelineContainer.appendChild(yearLabel);
+                
+                // Create event text
+                const eventText = document.createElement('div');
+                eventText.classList.add('event-text');
+                // Add accent color to specific words
+                let text = event.text;
+                text = text.replace('Genesis', '<span class="accent">Genesis</span>');
+                text = text.replace('Degens', '<span class="accent">Degens</span>');
+                text = text.replace('crash', '<span class="accent">crash</span>');
+                text = text.replace('Builders', '<span class="accent">Builders</span>');
+                text = text.replace('Revival', '<span class="accent">Revival</span>');
+                text = text.replace('last line', '<span class="accent">last line</span>');
+                eventText.innerHTML = text;
+                eventText.style.left = `${position}%`;
+                eventText.id = `event-${index}`;
+                timelineContainer.appendChild(eventText);
+            });
+
+            // Timeline animation
+            let currentEvent = 0;
+            const totalEvents = timelineData.length;
+            const nodeActivationDelay = 4000; // Time between node activations
+            
+            function animateTimeline() {
+                if (currentEvent < totalEvents) {
+                    const eventElement = document.getElementById(`event-${currentEvent}`);
+                    const nodeElement = document.getElementById(`node-${currentEvent}`);
+                    const yearElement = document.getElementById(`year-${currentEvent}`);
+                    
+                    // Activate current node and year
+                    nodeElement.classList.add('active');
+                    yearElement.classList.add('active');
+                    
+                    // Show event text
+                    eventElement.classList.add('active');
+                    
+                    // After a delay, fade out text and move to next event
+                    setTimeout(() => {
+                        eventElement.classList.remove('active');
+                        currentEvent++;
+                        animateTimeline();
+                    }, nodeActivationDelay);
+                } else {
+                    // Timeline complete
+                    setTimeout(() => {
+                        finalMessage.classList.add('visible');
+                        
+                        // Dim the timeline nodes
+                        document.querySelectorAll('.timeline-node').forEach(node => {
+                            node.style.borderColor = '#444';
+                            node.style.boxShadow = 'none';
+                        });
+                        
+                        // Start sleep mode timer
+                        startSleepTimer();
+                    }, 2000);
+                }
+            }
+            
+            // Start the timeline animation after a brief delay
+            setTimeout(animateTimeline, 1000);
+            
+            // Sleep mode functionality
+            let sleepTimer;
+            function startSleepTimer() {
+                sleepTimer = setTimeout(() => {
+                    sleepOverlay.classList.add('active');
+                }, 8000); // 8 seconds of inactivity
+            }
+            
+            function resetSleepTimer() {
+                clearTimeout(sleepTimer);
+                sleepOverlay.classList.remove('active');
+                startSleepTimer();
+            }
+            
+            // Reset sleep timer on user interaction
+            document.addEventListener('mousemove', resetSleepTimer);
+            document.addEventListener('click', resetSleepTimer);
+            document.addEventListener('keydown', resetSleepTimer);
+            
+            // Initial sleep timer start
+            startSleepTimer();
+        });
+    </script>
+</body>
+</html>
